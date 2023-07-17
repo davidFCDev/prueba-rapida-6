@@ -1,14 +1,31 @@
-import { useEffect, useState } from "react";
 import "./App.css";
+import { useEffect, useState } from "react";
 import { Movies } from "./components/Movies";
 import { useMovies } from "./hooks/useMovies";
-// const API_KEY_OMDB = '6c52a547';
-// const API_URL = `https://www.omdbapi.com/?apikey=${API_KEY_OMDB}&s=${search}`;
 
+function useSearch() {
+  const [search, updateSearch] = useState("");
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (search === "") {
+      setError("No se puede buscar una película vacía");
+      return;
+    }
+
+    if (search.length < 3) {
+      setError("La búsqueda debe tener al menos 3 caracteres");
+      return;
+    }
+
+    setError(null);
+  }, [search]);
+
+  return { search, updateSearch, error };
+}
 function App() {
   const { movies } = useMovies();
-  const [query, setQuery] = useState("");
-  const [error, setError] = useState(null);
+  const { search, updateSearch, error } = useSearch();
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -17,22 +34,8 @@ function App() {
   };
 
   const handleChange = (event) => {
-    setQuery(event.target.value);
+    updateSearch(event.target.value);
   };
-
-  useEffect(() => {
-    if (query === "") {
-      setError("No se puede buscar una película vacía");
-      return;
-    }
-
-    if (query.length < 3) {
-      setError("La búsqueda debe tener al menos 3 caracteres");
-      return;
-    }
-
-    setError(null);
-  }, [query]);
 
   return (
     <div className="page">
@@ -42,7 +45,7 @@ function App() {
           <input
             name="query"
             onChange={handleChange}
-            value={query}
+            value={search}
             placeholder="Avengers, matrix..."
           />
           <button type="submit">Search</button>
